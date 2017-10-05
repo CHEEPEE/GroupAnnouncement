@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "384851874592",
+    "firebase_url": "https://groupannouncement-2fe60.firebaseio.com",
+    "project_id": "groupannouncement-2fe60",
+    "storage_bucket": "groupannouncement-2fe60.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:384851874592:android:7841444f72462d7b",
+        "android_client_info": {
+          "package_name": "com.announcement.schol.schoolannouncementgroupchatwithfilesharing"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "384851874592-3dhn3th3d54biflobs9bjouit3is5rh8.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.announcement.schol.schoolannouncementgroupchatwithfilesharing",
+            "certificate_hash": "7c459a08b1abaca944ad265fe7cba80b03505d2c"
+          }
+        },
+        {
+          "client_id": "384851874592-71lvjafui6q6frt9a544sgs0qa7k8s07.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDA7grTOFUkkEvAqBHuScrWLF7dxqxAP98"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "384851874592-71lvjafui6q6frt9a544sgs0qa7k8s07.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
