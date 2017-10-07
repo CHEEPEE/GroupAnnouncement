@@ -54,7 +54,6 @@ public class LogInActivty extends AppCompatActivity {
         ButterKnife.bind(this);
         mAuth = FirebaseAuth.getInstance();
         progressBar.setVisibility(View.INVISIBLE);
-        progressBar.getIndeterminateDrawable().setColorFilter(getResources().getColor(R.color.white), PorterDuff.Mode.SRC_ATOP);
         buttonlogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -80,6 +79,7 @@ public class LogInActivty extends AppCompatActivity {
         if (currentUser!=null) {
             Intent i = new Intent(LogInActivty.this,GroupChatActivity.class);
             startActivity(i);
+            LogInActivty.this.finish();
         }
     }
 
@@ -96,6 +96,7 @@ public class LogInActivty extends AppCompatActivity {
                                 Intent i = new Intent(LogInActivty.this, GroupChatActivity.class);
                                 startActivity(i);
                                 System.out.println("success");
+
                             } else {
                                 // If sign in fails, display a message to the user.
                                 progressBar.setVisibility(View.INVISIBLE);

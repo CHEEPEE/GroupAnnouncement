@@ -5,10 +5,13 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -37,6 +40,8 @@ public class SignUpActivity extends AppCompatActivity {
     EditText lnameField;
     @BindView(R.id.signup)
     Button signup;
+    @BindView(R.id.signupprogress)
+    ProgressBar progressBar;
 
 
     @Override
@@ -52,6 +57,7 @@ public class SignUpActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 createAccount(emailfield.getText().toString(),passwordField.getText().toString(),fnameField.getText().toString()+" "+lnameField.getText().toString());
+                progressBar.setVisibility(View.VISIBLE);
             }
         });
 
@@ -59,42 +65,45 @@ public class SignUpActivity extends AppCompatActivity {
 
     private void createAccount(String email, String password, final String displayName) {
         // [START create_user_with_email]
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
+        if (validateForm()){
+            mAuth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<AuthResult> task) {
+                            if (task.isSuccessful()) {
 
-                            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-                            UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
-                                    .setDisplayName(displayName)
-                                    .setPhotoUri(Uri.EMPTY)
-                                    .build();
+                                UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                        .setDisplayName(displayName)
+                                        .setPhotoUri(Uri.EMPTY)
+                                        .build();
 
-                            user.updateProfile(profileUpdates)
-                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-                                        @Override
-                                        public void onComplete(@NonNull Task<Void> task) {
-                                            if (task.isSuccessful()) {
-                                                Log.d("User Profile Update", "User profile updated.");
-                                                writeNewUser(mAuth.getCurrentUser().getUid().toString(),"test",mAuth.getCurrentUser().getEmail().toString());
+                                user.updateProfile(profileUpdates)
+                                        .addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (task.isSuccessful()) {
+                                                    Log.d("User Profile Update", "User profile updated.");
+                                                    writeNewUser(mAuth.getCurrentUser().getUid().toString(),"test",mAuth.getCurrentUser().getEmail().toString());
 
 
+                                                }
                                             }
-                                        }
-                                    });
-                            mAuth.signOut();
-                            Intent i = new Intent(SignUpActivity.this,LogInActivty.class);
-                            startActivity(i);
+                                        });
+                                mAuth.signOut();
+                                Intent i = new Intent(SignUpActivity.this,LogInActivty.class);
+                                startActivity(i);
 
 
-                        } else {
+                            } else {
+                                Log.d("Authentication Status","Aunthentication failed");
+                                Toast.makeText(SignUpActivity.this,"Account Creation Failed Please check your Internet",Toast.LENGTH_SHORT).show();
+                            }
 
                         }
-
-                    }
-                });
+                    });
+        }
     }
     @IgnoreExtraProperties
     public class User {
@@ -120,6 +129,43 @@ public class SignUpActivity extends AppCompatActivity {
         mDatabase.child("users").child(userId).child("email").setValue(email);
         mDatabase.child("users").child(userId).child("userid").setValue(userId);
 
+    }
+
+    private boolean validateForm() {
+        boolean valid = true;
+
+        String emailString = emailfield.getText().toString();
+        if (TextUtils.isEmpty(emailString)) {
+            emailfield.setError("Required.");
+            valid = false;
+        } else {
+            emailfield.setError(null);
+        }
+
+        String passwordString = emailfield.getText().toString();
+        if (TextUtils.isEmpty(passwordString)) {
+            passwordField.setError("Required.");
+            valid = false;
+        } else {
+            passwordField.setError(null);
+        }
+
+        String fname = fnameField.getText().toString();
+        if (TextUtils.isEmpty(fname)) {
+            fnameField.setError("Required.");
+            valid = false;
+        } else {
+            fnameField.setError(null);
+        }
+        String lname = lnameField.getText().toString();
+        if (TextUtils.isEmpty(lname)) {
+            lnameField.setError("Required.");
+            valid = false;
+        } else {
+            lnameField.setError(null);
+        }
+
+        return valid;
     }
 
 }
