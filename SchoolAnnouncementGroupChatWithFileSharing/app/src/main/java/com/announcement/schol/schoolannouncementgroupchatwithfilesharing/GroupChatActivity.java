@@ -275,15 +275,6 @@ public class GroupChatActivity extends AppCompatActivity {
 
 
 public void uploadFromInputStream(final Uri uri){
-   /* int indexgetPath = uri.getPath().indexOf(":");
-    int getLenght = uri.getPath().length();
-    String name = uri.getLastPathSegment().substring(uri.getLastPathSegment().indexOf("/"),uri.getLastPathSegment().length());
-    System.out.println(getFileName(uri));*/
-
-
-
-  // Uri file = Uri.fromFile(new File(Environment.getExternalStorageState()+File.separator+uri.getLastPathSegment()));
-   // Uri file = Uri.fromFile(new File(root+File.separator+"your lie in april.mp4"));
     InputStream file = null;
     try {
         file = getContentResolver().openInputStream(uri);
@@ -300,7 +291,8 @@ public void uploadFromInputStream(final Uri uri){
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     // Get a URL to the uploaded content
-                    @SuppressWarnings("VisibleForTests") String downloadUri = taskSnapshot.getDownloadUrl().toString();
+                    @SuppressWarnings("VisibleForTests")
+                    String downloadUri = taskSnapshot.getDownloadUrl().toString();
                     /*Uri downloadUrl = taskSnapshot.getDownloadUrl();*/
 
                     System.out.println("Upload Success");
@@ -313,8 +305,6 @@ public void uploadFromInputStream(final Uri uri){
                     writeNewMsg(uEmail,name,getFileName(uri),timeStamp,downloadUri);
                     messageListAdapter.notifyDataSetChanged();
                     uploadProgress.setVisibility(View.INVISIBLE);
-
-
                 }
             })
             .addOnFailureListener(new OnFailureListener() {
@@ -325,7 +315,7 @@ public void uploadFromInputStream(final Uri uri){
                     System.out.println("Upload Failed");
                 }
             });
-    riversRef.putStream(file).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+    /*riversRef.putStream(file).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
         @Override
         public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
             @SuppressWarnings("VisibleForTests") long bytesTransferred = taskSnapshot.getBytesTransferred();
@@ -334,7 +324,7 @@ public void uploadFromInputStream(final Uri uri){
             System.out.println("Upload is " + progress + "% done");
 
         }
-    });
+    });*/
 
 }
 
