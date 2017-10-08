@@ -8,6 +8,9 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Picasso;
+
 import java.util.ArrayList;
 
 /**
@@ -47,6 +50,7 @@ public class messageListAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         View rootView = inflater.inflate(R.layout.message_list_single_item,null);
         TextView user,message,iconText,timestamp;
+        ImageView image = (ImageView) rootView.findViewById(R.id.image_view);
         ImageView downloadicon = (ImageView) rootView.findViewById(R.id.download_icon);
         if (messageChatModels.get(position).getDownloadURL()!=null){
             downloadicon.setVisibility(View.VISIBLE);
@@ -59,9 +63,19 @@ public class messageListAdapter extends BaseAdapter {
         message = (TextView) rootView.findViewById(R.id.text_message);
         iconText = (TextView) rootView.findViewById(R.id.icon_text);
         iconText.setText(messageChatModels.get(position).getUsername().substring(0,1).toUpperCase());
+        user.setText(messageChatModels.get(position).getUsername());
+        message.setText(messageChatModels.get(position).getMessage());
 
-            user.setText(messageChatModels.get(position).getUsername());
-            message.setText(messageChatModels.get(position).getMessage());
+        String type = messageChatModels.get(position).getType();
+
+        if (type.equals("image")){
+            image.setVisibility(View.VISIBLE);
+            Picasso.with(context).load(messageChatModels.get(position).getDownloadURL()).centerCrop().resize(400,400).error(R.drawable.ic_error_black_24dp).into(image);
+
+        }else {
+            image.setVisibility(View.INVISIBLE);
+        }
+
 
 
 

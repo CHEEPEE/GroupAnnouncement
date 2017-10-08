@@ -21,6 +21,7 @@ public class MsgText {
     public String message;
     public String timeStamp;
     public String downloadURL;
+    public String type;
 
     public int starCount = 0;
     public Map<String, Boolean> stars = new HashMap<>();
@@ -29,12 +30,13 @@ public class MsgText {
 
     }
 
-    public MsgText(String username, String email, String smg, String timeStamp,String url) {
+    public MsgText(String username, String email, String smg, String timeStamp,String url,String FileType) {
         this.username = username;
         this.email = email;
         this.message = smg;
         this.timeStamp = timeStamp;
         this.downloadURL = url;
+        this.type = FileType;
     }
     // [START post_to_map]
     @Exclude
@@ -45,6 +47,7 @@ public class MsgText {
         result.put("message", message);
         result.put("timeStamp",timeStamp);
         result.put("downloadURL", downloadURL);
+        result.put("type",type);
 
 
         return result;

@@ -9,7 +9,10 @@ public class messageChatModel {
    private String message;
     private String timestamp;
     private String downloadURL;
-
+    private String type;
+    public String getType(){
+        return type;
+    }
     public String getTimestamp(){
         return timestamp;
     }
@@ -24,6 +27,9 @@ public class messageChatModel {
     }
     public void setDownloadURL(String dURL){
         this.downloadURL = dURL;
+    }
+    public void setType(String setmsgType){
+        this.type = setmsgType;
     }
     public void setUsername(String setName){
         this.username = setName;

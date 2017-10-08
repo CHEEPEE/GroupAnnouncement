@@ -1,13 +1,14 @@
 package com.announcement.schol.schoolannouncementgroupchatwithfilesharing;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.OpenableColumns;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.CardView;
@@ -16,11 +17,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.RelativeLayout;
+import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -30,9 +32,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -89,29 +89,12 @@ public class GroupChatActivity extends AppCompatActivity {
                 String uEmail = mAuth.getCurrentUser().getEmail();
                 String msg = msgField.getText().toString();
                 String timeStamp = Utils.formatTheDate(new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date()));
-                writeNewMsg(uEmail,name,msg,timeStamp,null);
+                writeNewMsg(uEmail,name,msg,timeStamp,null,"msg");
                 messageListAdapter.notifyDataSetChanged();
 
 
             }
         });
-
-
-        mChatDatabase.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-
-
 
         mChatDatabase.addChildEventListener(new ChildEventListener() {
             @Override
@@ -119,6 +102,7 @@ public class GroupChatActivity extends AppCompatActivity {
             }
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+
                 msgField.setText("");
                 MsgText msgText = dataSnapshot.getValue(MsgText.class);
 
@@ -127,9 +111,10 @@ public class GroupChatActivity extends AppCompatActivity {
                 msgModel.setMessage(msgText.message);
                 msgModel.setTimestamp(msgText.timeStamp);
                 msgModel.setDownloadURL(msgText.downloadURL);
+                msgModel.setType(msgText.type);
                 messageChatModels.add(msgModel);
-                messageListAdapter.notifyDataSetChanged();
                 System.out.println(msgText.message +" "+msgText.username+" "+msgText.timeStamp+" "+msgText.downloadURL);
+                messageListAdapter.notifyDataSetChanged();
 
 
 
@@ -169,7 +154,8 @@ public class GroupChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                performFileSearch();
+          performFileSearch();
+
 
 
 
@@ -212,11 +198,11 @@ public class GroupChatActivity extends AppCompatActivity {
 
 
 
-    private void writeNewMsg(String useremail, String username, String msg, String timestamp,String downloadURL) {
+    private void writeNewMsg(String useremail, String username, String msg, String timestamp,String downloadURL,String type) {
         // Create new post at /user-posts/$userid/$postid and at
         // /posts/$postid simultaneously
         String key = mChatDatabase.push().getKey();
-        MsgText msgText = new MsgText(username,useremail,msg,timestamp,downloadURL);
+        MsgText msgText = new MsgText(username,useremail,msg,timestamp,downloadURL,type);
         Map<String, Object> postValues = msgText.toMap();
 
         Map<String, Object> childUpdates = new HashMap<>();
@@ -246,6 +232,27 @@ public class GroupChatActivity extends AppCompatActivity {
 
 
     }
+    public void performImageSearch() {
+
+        // ACTION_OPEN_DOCUMENT is the intent to choose a file via the system's file
+        // browser.
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+
+        // Filter to only show results that can be "opened", such as a
+        // file (as opposed to a list of contacts or timezones)
+        //intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        // Filter to show only images, using the image MIME data type.
+        // If one wanted to search for ogg vorbis files, the type would be "audio/ogg".
+        // To search for all documents available via installed storage providers,
+        // it would be "*/*".
+        intent.setType("image/*");
+
+
+        startActivityForResult(Intent.createChooser(intent,"Choose File"), READ_REQUEST_CODE);
+
+
+    }
     @Override
     public void onActivityResult(int requestCode, int resultCode,
                                  Intent resultData) {
@@ -262,8 +269,8 @@ public class GroupChatActivity extends AppCompatActivity {
             Uri uri = null;
             if (resultData != null) {
                 uri = resultData.getData();
-                Log.i("TAG", "Uri: " + uri.toString());
-                uploadFromInputStream(uri);
+                Log.i("TAG", "Uri: " + uri.getLastPathSegment());
+                uploadFileFromInputStream(uri);
                 uploadProgress.setVisibility(View.VISIBLE);
 
             }
@@ -274,7 +281,7 @@ public class GroupChatActivity extends AppCompatActivity {
 
 
 
-public void uploadFromInputStream(final Uri uri){
+public void uploadFileFromInputStream(final Uri uri){
     InputStream file = null;
     try {
         file = getContentResolver().openInputStream(uri);
@@ -282,6 +289,21 @@ public void uploadFromInputStream(final Uri uri){
         e.printStackTrace();
     }
 
+    System.out.println(getFileName(uri));
+    final String type;
+    if (getFileName(uri).substring(getFileName(uri).length()-3,getFileName(uri).length()).toLowerCase().equals("jpg") || getFileName(uri).substring(getFileName(uri).length()-3,getFileName(uri).length()).toLowerCase().equals("png")){
+        type = "image";
+    }else {
+        type="file";
+    }
+
+    final String msgTitle;
+
+    if (msgField.getText().toString().equals("") || msgField.getText().toString().equals(null)){
+        msgTitle = getFileName(uri);
+    }else {
+        msgTitle = msgField.getText().toString();
+    }
 
 
     StorageReference riversRef = mStorageRef.child("files/"+File.separator+getFileName(uri)+file.toString()+File.separator+getFileName(uri));
@@ -302,7 +324,7 @@ public void uploadFromInputStream(final Uri uri){
                     String uEmail = mAuth.getCurrentUser().getEmail();
                     String msg = msgField.getText().toString();
                     String timeStamp = Utils.formatTheDate(new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss").format(new Date()));
-                    writeNewMsg(uEmail,name,getFileName(uri),timeStamp,downloadUri);
+                    writeNewMsg(uEmail,name,msgTitle.toString(),timeStamp,downloadUri,type);
                     messageListAdapter.notifyDataSetChanged();
                     uploadProgress.setVisibility(View.INVISIBLE);
                 }
@@ -315,32 +337,7 @@ public void uploadFromInputStream(final Uri uri){
                     System.out.println("Upload Failed");
                 }
             });
-    /*riversRef.putStream(file).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-        @Override
-        public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-            @SuppressWarnings("VisibleForTests") long bytesTransferred = taskSnapshot.getBytesTransferred();
-            @SuppressWarnings("VisibleForTests") long byteTotal = taskSnapshot.getTotalByteCount();
-            double progress = (100.0 * bytesTransferred) / byteTotal;
-            System.out.println("Upload is " + progress + "% done");
-
-        }
-    });*/
-
 }
-
-    private String getRealPathFromURI(Uri contentURI) {
-        String result;
-        Cursor cursor = getContentResolver().query(contentURI, null, null, null, null);
-        if (cursor == null) {
-            result = contentURI.getPath();
-        } else {
-            cursor.moveToFirst();
-            int idx = cursor.getColumnIndex(MediaStore.Images.ImageColumns.DATA);
-            result = cursor.getString(idx);
-            cursor.close();
-        }
-        return result;
-    }
 
     private String getFileName(Uri uri) {
         String result = null;
@@ -363,6 +360,7 @@ public void uploadFromInputStream(final Uri uri){
         }
         return result;
     }
+
 
 
 
